@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinyl Shop Catalog</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 2rem;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .card {
+            background-color: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        .card img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+            background-color: #334155;
+        }
+        .card-content {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .album-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+        .meta {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            margin-bottom: 0.25rem;
+        }
+        .price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+        .error {
+            text-align: center;
+            color: #f87171;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <h1>Каталог вінілових платівок</h1>
+    <div id="catalog" class="grid"></div>
+    <div id="error-message" class="error"></div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:8000/records';
+
+        async function loadRecords() {
+            const catalogEl = document.getElementById('catalog');
+            const errorEl = document.getElementById('error-message');
+
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const records = await response.json();
+
+                if (records.length === 0) {
+                    catalogEl.innerHTML = '<p style="text-align:center;grid-column: 1/-1;">Платівок не знайдено.</p>';
+                    return;
+                }
+
+                catalogEl.innerHTML = records.map(record => `
+                    <div class="card">
+                        <img src="${record.cover_image || 'https://via.placeholder.com/300'}" alt="${record.album}">
+                        <div class="card-content">
+                            <h3 class="album-title">${record.album}</h3>
+                            <div class="meta"><strong>Виконавець:</strong> ${record.artist}</div>
+                            <div class="meta"><strong>Жанр:</strong> ${record.genre}</div>
+                            <div class="meta"><strong>Рік:</strong> ${record.year}</div>
+                            <div class="price">$${parseFloat(record.price).toFixed(2)}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                errorEl.textContent = `Помилка завантаження даних із API: ${err.message}. Перевірте, чи запущений бекенд і чи налаштовано CORS.`;
+            }
+        }
+
+        loadRecords();
+    </script>
+</body>
+</html>
