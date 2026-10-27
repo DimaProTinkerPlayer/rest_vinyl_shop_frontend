@@ -82,12 +82,12 @@
             try {
                 const response = await fetch(API_URL);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP статус: ${response.status}`);
                 }
                 const records = await response.json();
 
                 if (records.length === 0) {
-                    catalogEl.innerHTML = '<p style="text-align:center;grid-column: 1/-1;">Платівок не знайдено.</p>';
+                    catalogEl.innerHTML = '<p style="text-align:center;grid-column: 1/-1;">У каталозі поки немає платівок.</p>';
                     return;
                 }
 
@@ -104,7 +104,7 @@
                     </div>
                 `).join('');
             } catch (err) {
-                errorEl.textContent = `Помилка завантаження даних із API: ${err.message}. Перевірте, чи запущений бекенд і чи налаштовано CORS.`;
+                errorEl.textContent = `Помилка з'єднання з API: ${err.message}. Перевірте, чи запущений бекенд на 8000 порті та чи налаштовано CORS.`;
             }
         }
 
