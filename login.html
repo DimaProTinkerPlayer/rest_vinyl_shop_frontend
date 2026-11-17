@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вхід — Vinyl Shop</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #0f172a; color: #f8fafc; margin: 0; padding: 2rem; }
+        nav { display: flex; justify-content: space-between; align-items: center; max-width: 1100px; margin: 0 auto 2rem; padding-bottom: 1rem; border-bottom: 1px solid #334155; }
+        nav a { color: #38bdf8; text-decoration: none; margin-right: 1rem; }
+        .form-box { max-width: 400px; margin: 3rem auto; background: #1e293b; padding: 2rem; border-radius: 8px; }
+        label { display: block; margin-top: 1rem; font-size: 0.9rem; color: #cbd5e1; }
+        input { width: 100%; padding: 0.6rem; margin-top: 0.3rem; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
+        button { width: 100%; margin-top: 1.5rem; padding: 0.7rem; background: #38bdf8; color: #0f172a; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; }
+        .error { color: #f87171; margin-top: 1rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <nav id="navbar"></nav>
+
+    <div class="form-box">
+        <h2>Вхід у систему</h2>
+        <form id="login-form">
+            <label>Username</label>
+            <input type="text" id="username" required>
+            <label>Пароль</label>
+            <input type="password" id="password" required>
+            <button type="submit">Увійти</button>
+        </form>
+        <div id="error-msg" class="error"></div>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        requireGuest();
+        renderNavbar();
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errorEl = document.getElementById('error-msg');
+            errorEl.textContent = '';
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                errorEl.textContent = data.detail || 'Невірний логін або пароль.';
+                return;
+            }
+
+            saveTokens(data.access, data.refresh);
+
+            const params = new URLSearchParams(window.location.search);
+            const nextPage = params.get('next') || 'index.html';
+            window.location.href = nextPage;
+        });
+    </script>
+</body>
+</html>
